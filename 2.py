@@ -1,5 +1,5 @@
 #!/usr/bin/python
-#coding:utf-8
+# coding:utf-8
 import requests
 import base64
 import os
@@ -9,15 +9,15 @@ import urllib3
 urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
 username= os.getenv("XIAOBEI_USERNAME")
-pd= os.getenv("XIAOBEI_PASSWORD")
+pd = os.getenv("XIAOBEI_PASSWORD")
 password=base64.b64encode(pd.encode())
 password=password.decode()
 SCKEY = os.getenv("XIAOBEI_SCKEY")
-#健康打卡提交的信息
-temperature={
+# 健康打卡提交的信息
+temperature = {
     "temperature": "36.3",
-    "coordinates": "中国-重庆市-重庆市-永川区",
-    "location": "105.933807,29.320102",
+    "coordinates": "中国-江苏省-苏州市-相城区",
+    "location": "120.585315,31.298886",
     "healthState": "1",
     "dangerousRegion": "2",
     "dangerousRegionRemark": "",
@@ -36,16 +36,19 @@ headers = {
     'Accept-Encoding': 'gzip'
     }
 
-#一系列的url
+# 一系列的url
 login_url ='https://xiaobei.yinghuaonline.com/prod-api/login'
 health_url='https://xiaobei.yinghuaonline.com/prod-api/student/health'
 captchaImage_url='https://xiaobei.yinghuaonline.com/prod-api/captchaImage'
-
 session = requests.Session()
+
+
 def captchaImage_session(_captchaImage_url):
-    #获取滑动验证码的code和uuid传给post_data进行登录验证
+    # 获取滑动验证码的code和uuid传给post_data进行登录验证
     _captchaImage_session=session.get(captchaImage_url,headers=headers,verify=False )
     return json.loads(_captchaImage_session.text)
+
+
 def login_session(_captchaImage_session,_username,_password):
     code=_captchaImage_session['showCode']
     uuid=_captchaImage_session['uuid']
@@ -56,9 +59,10 @@ def login_session(_captchaImage_session,_username,_password):
         "uuid":uuid
     }
 
-    #登录小北同学得到token并且传给headers中的Authorization发送请求头中
+    # 登录小北同学得到token并且传给headers中的Authorization发送请求头中
     _login_session=session.post(login_url,json = post_data,headers = headers,verify=False)
     return json.loads(_login_session.text)
+
 
 def get_token(_login_session):
     try:
@@ -66,6 +70,7 @@ def get_token(_login_session):
         headers["Authorization"] ='Bearer ' +token
     except Exception as e:
         notify('账号或者密码错误,请仔细阅读配置步骤')
+
 
 def post_health():
     _post_health=session.post(health_url,json = temperature,headers = headers,verify=False)
@@ -84,6 +89,7 @@ def notify(_title, _message=None):
         print(f"发送qq通知成功")
     else:
         print(f"发送qq通知失败：{_response.status_code}")
+
 
 if __name__ == "__main__":
     if not username or not password:
